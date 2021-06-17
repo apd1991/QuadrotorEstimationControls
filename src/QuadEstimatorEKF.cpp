@@ -1,3 +1,4 @@
+
 #include "Common.h"
 #include "QuadEstimatorEKF.h"
 #include "Utility/SimpleConfig.h"
@@ -93,9 +94,16 @@ void QuadEstimatorEKF::UpdateFromIMU(V3F accel, V3F gyro)
   // (replace the code below)
   // make sure you comment it out when you add your own code -- otherwise e.g. you might integrate yaw twice
 
-  float predictedPitch = pitchEst + dtIMU * gyro.y;
-  float predictedRoll = rollEst + dtIMU * gyro.x;
-  ekfState(6) = ekfState(6) + dtIMU * gyro.z;	// yaw
+  //float predictedPitch = pitchEst + dtIMU * gyro.y;
+  //float predictedRoll = rollEst + dtIMU * gyro.x;
+  //ekfState(6) = ekfState(6) + dtIMU * gyro.z;	// yaw
+
+ Quaternion<float> attitudeRead = Quaternion<float>::FromEuler123_RPY(rollEst, pitchEst, ekfState(6));
+ Quaternion<float> attitudeUpdate = attitudeRead.IntegrateBodyRate(gyro, dtIMU);
+
+ float predictedRoll = attitudeUpdate.Roll();
+ float  predictedPitch = attitudeUpdate.Pitch();
+  ekfState(6) = attitudeUpdate.Yaw();
 
   // normalize yaw to -pi .. pi
   if (ekfState(6) > F_PI) ekfState(6) -= 2.f*F_PI;
@@ -161,6 +169,15 @@ VectorXf QuadEstimatorEKF::PredictState(VectorXf curState, float dt, V3F accel, 
   Quaternion<float> attitude = Quaternion<float>::FromEuler123_RPY(rollEst, pitchEst, curState(6));
 
   ////////////////////////////// BEGIN STUDENT CODE ///////////////////////////
+  predictedState(0) = predictedState(0) + curState(3) * dt;
+  predictedState(1) = predictedState(1) + curState(4) * dt;
+  predictedState(2) = predictedState(2) + curState(5) * dt;
+
+  V3F worldAccel = attitude.Rotate_BtoI(accel);
+
+  predictedState(3) = predictedState(3) + worldAccel.x * dt;
+  predictedState(4) = predictedState(4) + worldAccel.y * dt;
+  predictedState(5) = (predictedState(5) -(float)CONST_GRAVITY * dt ) + worldAccel.z * dt ;
 
 
   /////////////////////////////// END STUDENT CODE ////////////////////////////
@@ -189,6 +206,9 @@ MatrixXf QuadEstimatorEKF::GetRbgPrime(float roll, float pitch, float yaw)
 
   ////////////////////////////// BEGIN STUDENT CODE ///////////////////////////
 
+  RbgPrime <<  -cos(pitch) * sin(yaw), -sin(roll) * sin(pitch) * sin(yaw) - cos(roll) * cos(yaw), -cos(roll) * sin(pitch) * sin(yaw) + sin(roll) * cos(yaw),
+      cos(pitch) * cos(yaw),sin(roll) * sin(pitch) * cos(yaw) - cos(roll) * sin(yaw), cos(roll) * sin(pitch) * cos(yaw) + sin(roll) * sin(yaw),
+      0,0,0;
 
   /////////////////////////////// END STUDENT CODE ////////////////////////////
 
@@ -234,7 +254,15 @@ void QuadEstimatorEKF::Predict(float dt, V3F accel, V3F gyro)
   gPrime.setIdentity();
 
   ////////////////////////////// BEGIN STUDENT CODE ///////////////////////////
+  gPrime(0, 3) = dt;
+  gPrime(1, 4) = dt;
+  gPrime(2, 5) = dt;
 
+  gPrime(3, 6) = RbgPrime(0, 0) * accel.x * dt + RbgPrime(0, 1) * accel.y * dt + RbgPrime(0, 2) * accel.z * dt;
+  gPrime(4, 6) = RbgPrime(1, 0) * accel.x * dt + RbgPrime(1, 1) * accel.y * dt + RbgPrime(1, 2) * accel.z * dt;
+  gPrime(6, 6) = RbgPrime(2, 0) * accel.x * dt + RbgPrime(2, 1) * accel.y * dt + RbgPrime(2, 2) * accel.z * dt;
+
+  ekfCov = gPrime * ekfCov * gPrime.transpose() + Q;
 
   /////////////////////////////// END STUDENT CODE ////////////////////////////
 
@@ -259,7 +287,11 @@ void QuadEstimatorEKF::UpdateFromGPS(V3F pos, V3F vel)
   //  - The GPS measurement covariance is available in member variable R_GPS
   //  - this is a very simple update
   ////////////////////////////// BEGIN STUDENT CODE ///////////////////////////
-
+  for (int i = 0; i < 6; i++) {
+      zFromX(i) = ekfState(i);
+      hPrime(i, i) = 1;
+  }
+ 
   /////////////////////////////// END STUDENT CODE ////////////////////////////
 
   Update(z, hPrime, R_GPS, zFromX);
@@ -280,8 +312,13 @@ void QuadEstimatorEKF::UpdateFromMag(float magYaw)
   //    (you don't want to update your yaw the long way around the circle)
   //  - The magnetomer measurement covariance is available in member variable R_Mag
   ////////////////////////////// BEGIN STUDENT CODE ///////////////////////////
+  zFromX(0) = ekfState(6);
+  float errYaw = magYaw - ekfState(6);
 
+  if (errYaw > F_PI) zFromX(0) += 2.f * F_PI;
+  if (errYaw < -F_PI) zFromX(0) -= 2.f * F_PI;
 
+  hPrime(0, 6) = 1;
   /////////////////////////////// END STUDENT CODE ////////////////////////////
 
   Update(z, hPrime, R_Mag, zFromX);

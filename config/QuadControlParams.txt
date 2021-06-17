@@ -6,7 +6,6 @@
 
 [QuadControlParams] 
 
-UseIdealEstimator=1
 
 # Physical properties
 Mass = 0.5
@@ -18,21 +17,25 @@ kappa = 0.016
 minMotorThrust = .1
 maxMotorThrust = 4.5
 
-# Position control gains
-kpPosXY = 2
+
+# Position control gains (Ideal/Non-Ideal Sensors)
+kpPosXY = 3
 kpPosZ = 2
-KiPosZ = 50
+KiPosZ = 60
 
-# Velocity control gains
-kpVelXY = 8
-kpVelZ = 8
 
-# Angle control gains
-kpBank = 12
-kpYaw = 3
+# Velocity control gains (Ideal/Non-Ideal Sensors)
+kpVelXY = 10
+kpVelZ = 15
 
-# Angle rate gains
-kpPQR = 70, 70, 15
+
+# Angle control gains (Ideal/Non-Ideal Sensors)
+kpBank = 15
+kpYaw = 2
+
+
+# Angle rate gains (Ideal/Non-Ideal Sensors)
+kpPQR = 95, 95, 7
 
 # limits
 maxAscentRate = 5
