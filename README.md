@@ -105,12 +105,12 @@ indicating you’re capturing approx 68% of the respective measurements (which i
 NOTE: Your answer should match the settings in `SimulatedSensors.txt`, 
 where you can also grab the simulated noise parameters for all the other sensors.
 
-**IMPLEMENTATION: The Standard Deviation of GPS Position X readings is 0.721655 and that of Acceleration X readings is 0.48974.
+***IMPLEMENTATION: The Standard Deviation of GPS Position X readings is 0.721655 and that of Acceleration X readings is 0.48974.
 The above values are reflected for variables "MeasuredStdDev_GPSPosXY" and "MeasuredStdDev_AccelXY" in "Sensornoise.txt" file in config folder.
 
 OUTPUT: |GPS_X measurement - Quad_X position| < Measured Std. of GPS PosXY for 72% of Simulation Time of 10 Sec.
-	|IMU_AccelX measurement - 0.0000| < Measured Std. of AccelXY for 68% of Simulation Time of 10 Sec.
-![Step1 Plot](images/Step1.png)**
+	|IMU_AccelX measurement - 0.0000| < Measured Std. of AccelXY for 68% of Simulation Time of 10 Sec.***
+![Step1 Plot](images/Step1.png)
 
 ### Step 2: Attitude Estimation ###
 
