@@ -132,9 +132,9 @@ In the screenshot above the attitude estimation using linear scheme (left) and u
 **Hint: see section 7.1.2 of [Estimation for Quadrotors](https://www.overleaf.com/read/vymfngphcccj) for a refresher on a good non-linear complimentary filter for attitude using quaternions.**
 
 ***IMPLEMENTATION: 
-![code snippet] (images/Step2Code.png)
+![code snippet](images/Step2Code.png)
 In above snippet, the commented lines are the originally implemented integration methods, which drifts away in long run. Newer implementation does a much better job in containing those errors.
-![code snippet] (images/Step2plot.png)
+![code snippet](images/Step2plot.png)
 
 ### Step 3: Prediction Step ###
 
