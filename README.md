@@ -110,7 +110,7 @@ The above values are reflected for variables "MeasuredStdDev_GPSPosXY" and "Meas
 
 OUTPUT: |GPS_X measurement - Quad_X position| < Measured Std. of GPS PosXY for 72% of Simulation Time of 10 Sec.
 	|IMU_AccelX measurement - 0.0000| < Measured Std. of AccelXY for 68% of Simulation Time of 10 Sec.
-![Step1 Plot] (images/Step1.png)
+![Step1 Plot](images/Step1.png)
 
 ### Step 2: Attitude Estimation ###
 
